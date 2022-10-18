@@ -17,13 +17,11 @@ public class UserService {
     public UserMapper userMapper;
 
     public List<User> listAll() {
-        List<User> users = userMapper.selectList(null);
-        return users;
+        return userMapper.selectList(null);
     }
 
     public String getUserNameById(Long id) {
-        String userName = userMapper.selectById(id).getUserName();
-        return userName;
+        return userMapper.selectById(id).getUserName();
     }
 
 }

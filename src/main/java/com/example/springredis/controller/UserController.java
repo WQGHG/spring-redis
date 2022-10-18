@@ -2,6 +2,7 @@ package com.example.springredis.controller;
 
 import com.example.springredis.entity.User;
 import com.example.springredis.service.UserService;
+import com.example.springredis.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -22,7 +23,7 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    RedisTemplate redisTemplate;
+    RedisUtil redisUtil;
 
     @RequestMapping(value = "/listAll")
     @ResponseBody
@@ -34,13 +35,13 @@ public class UserController {
     @ResponseBody
     public String getUserNameById(@RequestParam("id") Long id) {
 
-        ValueOperations<Long, String> valueOperations = redisTemplate.opsForValue();
-        String redisUserName = valueOperations.get(id);
+        String redisId = Long.toString(id);
+        String redisUserName = redisUtil.get(redisId);
         if (redisUserName != null) {
             return redisUserName;
         }
         String dbUserName = userService.getUserNameById(id);
-        valueOperations.set(id, dbUserName);
+        redisUtil.set(redisId, dbUserName);
         return dbUserName;
     }
 
