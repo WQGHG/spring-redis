@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by wangqinggang on 2020/09/18.
+ * Created by wqg on 2020/09/18.
  */
 @Component
 public class RedisLock {
@@ -16,15 +16,15 @@ public class RedisLock {
     RedisUtil redisUtil;
 
     /**
-     * 是否能获取redis锁； false能， true不能
+     * 是否能获取redis锁； false不能， true能
      * @param key
      * @return
      */
-    public Boolean isLocked(String key) {
+    public Boolean getLocked(String key) {
         if (StringUtils.isEmpty(redisUtil.get(key))) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**

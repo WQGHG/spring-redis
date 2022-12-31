@@ -12,13 +12,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * 一个操作redis的工具类 key只允许为String
  *
- * Created by wangqinggang on 2020/09/16.
+ * Created by wqg on 2020/09/16.
  */
 @Component
 public class RedisUtil {
 
     @Autowired
-    RedisTemplate redisTemplate;
+    RedisTemplate<String, Object> redisTemplate;
 
 //=====================================通用============================================================
 
@@ -71,7 +71,6 @@ public class RedisUtil {
 
     /**
      * 根据key获取value
-     * @param key
      * @return
      */
     public String get(String key) {
@@ -81,7 +80,6 @@ public class RedisUtil {
     /**
      * 插入数据
      * @param key
-     * @param value
      */
     public void set(String key, String value) {
         redisTemplate.opsForValue().set(key, value);
@@ -91,7 +89,6 @@ public class RedisUtil {
      *  插入数据并设置过期时间 单位为秒
      * @param key
      * @param value
-     * @param timeout
      */
     public void set(String key, String value, long timeout, TimeUnit timeUnit) {
         if (timeout > 0) {
@@ -435,4 +432,32 @@ public class RedisUtil {
     public Object rightPop(String key, long timeout, TimeUnit unit) {
         return redisTemplate.opsForList().rightPop(key, timeout, unit);
     }
+
+//=====================================zset类型============================================================
+
+    /**
+     * 向key对应的有序set中添加一个value，score为排序值
+     * @param key
+     * @param value
+     * @param score
+     * @return
+     */
+    public Boolean zAdd(String key, Object value, double score) {
+        return redisTemplate.opsForZSet().add(key, value, score);
+    }
+
+    /**
+     * 在key对应的有序set中删除values
+     * @param key
+     * @param values
+     * @return 删除的元素个数
+     */
+    public Long zRemove(String key, Object... values) {
+        return redisTemplate.opsForZSet().remove(key, values);
+    }
+
+    public Set<Object> zGet(String key, double start, double end) {
+        return redisTemplate.opsForZSet().rangeByScore(key, start, end);
+    }
+
 }

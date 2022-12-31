@@ -1,5 +1,6 @@
 package com.example.springredis.config;
 
+import com.example.springredis.service.ConsumeRedisQueueService;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -12,12 +13,19 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.concurrent.CompletableFuture;
+
 /**
  * redis序列化方式
- * Created by wangqinggang on 2020/09/17.
+ * Created by wqg on 2020/09/17.
  */
 @Configuration
 public class RedisConfig {
+
+    @Resource
+    ConsumeRedisQueueService consumeRedisService;
 
     @Bean(name = "redisTemplate")
     public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
@@ -44,6 +52,12 @@ public class RedisConfig {
         return redisTemplate;
     }
 
+    @PostConstruct
+    private void initConsumeRedisQueue() {
+        CompletableFuture.runAsync(() -> {
+            consumeRedisService.consumeRedisQueue();
+        });
+    }
 
 }
 
