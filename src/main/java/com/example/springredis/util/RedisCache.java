@@ -1,9 +1,9 @@
 package com.example.springredis.util;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,9 +15,9 @@ import java.util.concurrent.TimeUnit;
  * Created by wqg on 2020/09/16.
  */
 @Component
-public class RedisUtil {
+public class RedisCache {
 
-    @Autowired
+    @Resource
     RedisTemplate<String, Object> redisTemplate;
 
 //=====================================通用============================================================

@@ -1,9 +1,9 @@
 package com.example.springredis.util;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisLock {
 
-    @Autowired
-    RedisUtil redisUtil;
+    @Resource
+    RedisCache redisCache;
 
     /**
      * 是否能获取redis锁； false不能， true能
@@ -21,7 +21,7 @@ public class RedisLock {
      * @return
      */
     public Boolean getLocked(String key) {
-        if (StringUtils.isEmpty(redisUtil.get(key))) {
+        if (StringUtils.isEmpty(redisCache.get(key))) {
             return true;
         }
         return false;
@@ -35,7 +35,7 @@ public class RedisLock {
      * @param timeUnit
      */
     public void lock(String key, String value, long time, TimeUnit timeUnit) {
-        redisUtil.set(key, value, time, timeUnit);
+        redisCache.set(key, value, time, timeUnit);
     }
 
     /**
@@ -43,7 +43,7 @@ public class RedisLock {
      * @param key
      */
     public void unLock(String key) {
-        redisUtil.delete(key);
+        redisCache.delete(key);
     }
 
 

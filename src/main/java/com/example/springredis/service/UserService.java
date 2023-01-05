@@ -13,7 +13,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
+    @Resource
     public UserMapper userMapper;
 
     public List<User> listAll() {

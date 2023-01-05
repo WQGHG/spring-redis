@@ -1,12 +1,13 @@
 package com.example.springredis.service;
 
 import com.example.springredis.util.RedisLock;
-import com.example.springredis.util.RedisUtil;
+import com.example.springredis.util.RedisCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.Resource;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -18,11 +19,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class ConsumeRedisQueueService {
 
-    @Autowired
+    @Resource
     RedisLock redisLock;
 
-    @Autowired
-    RedisUtil redisUtil;
+    @Resource
+    RedisCache redisCache;
 
     public void consumeRedisQueue() {
         String LOCK = "LOCK";
@@ -38,18 +39,18 @@ public class ConsumeRedisQueueService {
                     continue;
                 }
                 redisLock.lock(LOCK, uuid, 1, TimeUnit.HOURS);
-                Set<Object> set = redisUtil.zGet(KEY, 0, System.currentTimeMillis() / 1000);
+                Set<Object> set = redisCache.zGet(KEY, 0, System.currentTimeMillis() / 1000);
                 if (!CollectionUtils.isEmpty(set)) {
                     // 每次删除一个元素, 防止出现重复消费或者消费失败
                     set.forEach(value -> {
                         log.info("User name is {}", value);
-                        redisUtil.zRemove(KEY, value);
+                        redisCache.zRemove(KEY, value);
                     });
                 }
             } catch (Exception e) {
                 log.error(e.getMessage());
             } finally {
-                if (uuid.equals(redisUtil.get(LOCK))) {
+                if (uuid.equals(redisCache.get(LOCK))) {
                     redisLock.unLock(LOCK);
                 }
             }

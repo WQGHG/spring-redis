@@ -28,6 +28,7 @@ public class RedisConfig {
     ConsumeRedisQueueService consumeRedisService;
 
     @Bean(name = "redisTemplate")
+    @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public RedisTemplate<String, Object> getRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(redisConnectionFactory);

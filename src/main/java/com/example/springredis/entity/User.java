@@ -19,6 +19,7 @@ public class User implements Serializable {
 
     @TableField(value = "username")
     private String userName;
+
     @TableField(value = "password")
     private String passWord;
 }
