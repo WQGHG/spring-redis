@@ -1,6 +1,6 @@
 package com.example.springredis.util;
 
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -14,17 +14,17 @@ import java.util.concurrent.TimeUnit;
  *
  * Created by wqg on 2020/09/16.
  */
+@SuppressWarnings(value = {"unchecked", "rawtypes"})
 @Component
 public class RedisCache {
 
     @Resource
-    RedisTemplate<String, Object> redisTemplate;
+    RedisTemplate redisTemplate;
 
 //=====================================通用============================================================
 
     /**
      * 指定一个key的过期时间 秒为单位
-     * @param key
      * @param timeout 过期时间
      */
     public Boolean expire(String key, long timeout) {
@@ -33,7 +33,6 @@ public class RedisCache {
 
     /**
      * 获取一个key的剩余过期时间 秒为单位
-     * @param key
      * @return
      */
     public Long getExpire(String key) {
@@ -42,7 +41,6 @@ public class RedisCache {
 
     /**
      * 判断一个key是否存在
-     * @param key
      * @return
      */
     public Boolean hasKey(String key) {
@@ -73,24 +71,23 @@ public class RedisCache {
      * 根据key获取value
      * @return
      */
-    public String get(String key) {
-        return key == null ? null : (String)redisTemplate.opsForValue().get(key);
+    public <V> V get(String key) {
+        ValueOperations<String, V> operations = redisTemplate.opsForValue();
+        return key == null ? null : operations.get(key);
     }
 
     /**
      * 插入数据
      * @param key
      */
-    public void set(String key, String value) {
+    public <V> void set(String key, V value) {
         redisTemplate.opsForValue().set(key, value);
     }
 
     /**
      *  插入数据并设置过期时间 单位为秒
-     * @param key
-     * @param value
      */
-    public void set(String key, String value, long timeout, TimeUnit timeUnit) {
+    public <V> void set(String key, V value, long timeout, TimeUnit timeUnit) {
         if (timeout > 0) {
             redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
         } else {
@@ -131,7 +128,7 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Set<Object> members(String key) {
+    public <V> Set<V> members(String key) {
         return redisTemplate.opsForSet().members(key);
     }
 
@@ -141,7 +138,7 @@ public class RedisCache {
      * @param count
      * @return
      */
-    public List<Object> randomMembers(String key, long count) {
+    public <V> List<V> randomMembers(String key, long count) {
         return redisTemplate.opsForSet().randomMembers(key, count);
     }
 
@@ -150,8 +147,9 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Object randomMember(String key) {
-        return redisTemplate.opsForSet().randomMember(key);
+    public <V> V randomMember(String key) {
+        SetOperations<String, V> setOperations = redisTemplate.opsForSet();
+        return setOperations.randomMember(key);
     }
 
     /**
@@ -159,8 +157,9 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Object pop(String key) {
-        return redisTemplate.opsForSet().pop(key);
+    public <V> V pop(String key) {
+        SetOperations<String, V> setOperations = redisTemplate.opsForSet();
+        return setOperations.pop(key);
     }
 
     /**
@@ -178,18 +177,14 @@ public class RedisCache {
      * @param value
      * @return
      */
-    public Boolean sHasKey(String key, Object value) {
+    public <V> Boolean sHasKey(String key, V value) {
         return redisTemplate.opsForSet().isMember(key, value);
     }
 
     /**
      * 将value从key对应的set转移到destKey对应的set中
-     * @param key
-     * @param value
-     * @param destKey
-     * @return
      */
-    public boolean move(String key, Object value, String destKey) {
+    public <V> boolean move(String key, V value, String destKey) {
         return redisTemplate.opsForSet().move(key, value, destKey);
     }
 
@@ -209,7 +204,7 @@ public class RedisCache {
      * @param otherKey
      * @return
      */
-    public Set<Object> difference(String key, String otherKey) {
+    public <V> Set<V> difference(String key, String otherKey) {
         return redisTemplate.opsForSet().difference(key,otherKey);
     }
 
@@ -220,7 +215,7 @@ public class RedisCache {
      * @param key
      * @param map
      */
-    public void add(String key, Map<Object, Object> map) {
+    public <HK, HV> void add(String key, Map<HK, HV> map) {
         redisTemplate.opsForHash().putAll(key, map);
     }
 
@@ -229,7 +224,7 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Map<Object, Object> getHashEntries(String key) {
+    public <HK, HV> Map<HK, HV> getHashEntries(String key) {
         return redisTemplate.opsForHash().entries(key);
     }
 
@@ -249,8 +244,9 @@ public class RedisCache {
      * @param hashKey
      * @return
      */
-    public Object getMapString(String key, String hashKey) {
-        return redisTemplate.opsForHash().get(key, hashKey);
+    public <HK, HV> HV getMapString(String key, String hashKey) {
+        HashOperations<String, HK, HV> hashOperations = redisTemplate.opsForHash();
+        return hashOperations.get(key, hashKey);
     }
 
     /**
@@ -270,7 +266,7 @@ public class RedisCache {
      * @param number long
      * @return
      */
-    public Long increment(String key, Object hashKey, long number) {
+    public <HK> Long increment(String key, HK hashKey, long number) {
         return redisTemplate.opsForHash().increment(key, hashKey, number);
     }
 
@@ -281,7 +277,7 @@ public class RedisCache {
      * @param number double
      * @return
      */
-    public Double increment(String key, Object hashKey, double number) {
+    public <HK> Double increment(String key, HK hashKey, double number) {
         return redisTemplate.opsForHash().increment(key, hashKey, number);
     }
 
@@ -290,7 +286,7 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Set<Object> hashKeys(String key) {
+    public <HK> Set<HK> hashKeys(String key) {
         return redisTemplate.opsForHash().keys(key);
     }
 
@@ -311,7 +307,7 @@ public class RedisCache {
      * @param value
      * @return list的长度
      */
-    public Long leftPush(String key, Object value) {
+    public <V> Long leftPush(String key, V value) {
         return redisTemplate.opsForList().leftPush(key, value);
     }
 
@@ -321,8 +317,9 @@ public class RedisCache {
      * @param index
      * @return
      */
-    public Object index(String key, long index) {
-        return redisTemplate.opsForList().index(key, index);
+    public <V> V index(String key, long index) {
+        ListOperations<String, V> listOperations = redisTemplate.opsForList();
+        return listOperations.index(key, index);
     }
 
     /**
@@ -332,17 +329,16 @@ public class RedisCache {
      * @param end
      * @return
      */
-    public List<Object> range(String key, long start, long end) {
+    public <V> List<V> range(String key, long start, long end) {
         return redisTemplate.opsForList().range(key, start, end);
     }
 
     /**
      * 将value放在list中pivot的前面
      * @param key
-     * @param pivot
      * @param value
      */
-    public Long leftPush(String key, String pivot, String value) {
+    public <V> Long leftPush(String key, V pivot, V value) {
         return redisTemplate.opsForList().leftPush(key, pivot, value);
     }
 
@@ -352,7 +348,7 @@ public class RedisCache {
      * @param values
      * @return
      */
-    public Long leftPushAll(String key, String... values) {
+    public <V> Long leftPushAll(String key, V... values) {
         return redisTemplate.opsForList().leftPushAll(key, values);
     }
 
@@ -362,7 +358,7 @@ public class RedisCache {
      * @param value
      * @return list的长度
      */
-    public Long rightPush(String key, Object value) {
+    public <V> Long rightPush(String key, V value) {
         return redisTemplate.opsForList().rightPush(key, value);
     }
 
@@ -372,7 +368,7 @@ public class RedisCache {
      * @param values
      * @return
      */
-    public Long rightPushAll(String key, String... values) {
+    public <V> Long rightPushAll(String key, V... values) {
         return redisTemplate.opsForList().rightPushAll(key, values);
     }
 
@@ -382,7 +378,7 @@ public class RedisCache {
      * @param value
      * @return
      */
-    public Long rightPushIfPresent(String key, Object value) {
+    public <V> Long rightPushIfPresent(String key, V value) {
         return redisTemplate.opsForList().rightPushIfPresent(key, value);
     }
 
@@ -400,8 +396,9 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Object leftPop(String key) {
-        return redisTemplate.opsForList().leftPop(key);
+    public <V> V leftPop(String key) {
+        ListOperations<String, V> listOperations = redisTemplate.opsForList();
+        return listOperations.leftPop(key);
     }
 
     /**
@@ -410,8 +407,9 @@ public class RedisCache {
      * @param timeout 超时时间
      * @param unit
      */
-    public Object leftPop(String key, long timeout, TimeUnit unit) {
-        return redisTemplate.opsForList().leftPop(key, timeout, unit);
+    public <V> V leftPop(String key, long timeout, TimeUnit unit) {
+        ListOperations<String, V> listOperations = redisTemplate.opsForList();
+        return listOperations.leftPop(key, timeout, unit);
     }
 
     /**
@@ -419,8 +417,9 @@ public class RedisCache {
      * @param key
      * @return
      */
-    public Object rightPop(String key) {
-        return redisTemplate.opsForList().rightPop(key);
+    public <V> V rightPop(String key) {
+        ListOperations<String, V> listOperations = redisTemplate.opsForList();
+        return listOperations.rightPop(key);
     }
 
     /**
@@ -429,8 +428,9 @@ public class RedisCache {
      * @param timeout 超时时间
      * @param unit
      */
-    public Object rightPop(String key, long timeout, TimeUnit unit) {
-        return redisTemplate.opsForList().rightPop(key, timeout, unit);
+    public <V> V rightPop(String key, long timeout, TimeUnit unit) {
+        ListOperations<String, V> listOperations = redisTemplate.opsForList();
+        return listOperations.rightPop(key, timeout, unit);
     }
 
 //=====================================zset类型============================================================
@@ -442,7 +442,7 @@ public class RedisCache {
      * @param score
      * @return
      */
-    public Boolean zAdd(String key, Object value, double score) {
+    public <V> Boolean zAdd(String key, V value, double score) {
         return redisTemplate.opsForZSet().add(key, value, score);
     }
 
@@ -452,11 +452,11 @@ public class RedisCache {
      * @param values
      * @return 删除的元素个数
      */
-    public Long zRemove(String key, Object... values) {
+    public <V> Long zRemove(String key, V... values) {
         return redisTemplate.opsForZSet().remove(key, values);
     }
 
-    public Set<Object> zGet(String key, double start, double end) {
+    public <V> Set<V> zGet(String key, double start, double end) {
         return redisTemplate.opsForZSet().rangeByScore(key, start, end);
     }
 

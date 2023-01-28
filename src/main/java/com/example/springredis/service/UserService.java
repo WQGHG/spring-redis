@@ -5,6 +5,7 @@ import com.example.springredis.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ import java.util.List;
 public class UserService {
 
     @Resource
-    public UserMapper userMapper;
+    private UserMapper userMapper;
 
     public List<User> listAll() {
         return userMapper.selectList(null);
